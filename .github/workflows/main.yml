@@ -25,7 +25,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./terraform_module/s3  # <-- change if your code is elsewhere
+        working-directory: .  # <-- change if your code is elsewhere
 
     steps:
       - name: Checkout Repository
