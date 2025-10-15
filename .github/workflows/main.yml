@@ -25,7 +25,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./AWS_INFRA/s3   # <-- change if your code is elsewhere
+        working-directory: ./AWS_INFRA/terraform_module/s3   # <-- change if your code is elsewhere
 
     steps:
       - name: Checkout Repository
