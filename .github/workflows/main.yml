@@ -39,7 +39,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::596122389379:role/GitHub_Actions #${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::596122389379:role/GitHub_Actions
           aws-region: ${{ env.AWS_REGION }}
 
       # Optional: Format Check
