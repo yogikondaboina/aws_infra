@@ -63,9 +63,9 @@ jobs:
           path: tfplan
 
 
-      # - name: Terraform Apply (on main only)
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve -input=false tfplan
+      - name: Terraform Apply (on main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false tfplan
       - name: Show current directory and files
         run: |
           echo "Current directory:"
