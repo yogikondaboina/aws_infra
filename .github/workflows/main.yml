@@ -71,6 +71,6 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           echo "Uploading Terraform state file to S3..."
-          aws s3 cp s3.tfstate s3://host-1b/terraform.tfstate
+          aws s3 cp ./terraform.tfstate s3://host-1b/terraform.tfstate
 
                 
