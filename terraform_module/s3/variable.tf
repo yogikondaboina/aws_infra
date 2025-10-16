@@ -1,7 +1,7 @@
 variable "bucket_name" {
   description = "The name of the S3 bucket"
   type        = string
-  default = "host_s1"
+  default = "host_s1A"
 }
 
 variable "acl" {
