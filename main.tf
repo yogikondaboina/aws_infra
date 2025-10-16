@@ -1,5 +1,26 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  required_version = ">= 1.5.0"
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
 module "s3_bucket" {
   source          = "./terraform_module/s3"
-  host_bucket_name = var.bucket_name  # Root variable passed to module variable
+  bucket_name     = var.bucket_name
+  acl             = "private"
+
+  tags = {
+    Environment = "Dev"
+    Project     = "S3 Module Demo"
+  }
 }
- 
+
