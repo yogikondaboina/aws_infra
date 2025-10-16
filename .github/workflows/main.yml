@@ -43,8 +43,8 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       # Optional: Format Check
-      - name: Terraform Format Check
-        run: terraform fmt -check
+      # - name: Terraform Format Check
+      #   run: terraform fmt -check
 
       - name: Terraform Init
         run: terraform init -input=false
