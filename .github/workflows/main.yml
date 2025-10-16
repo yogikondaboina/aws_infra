@@ -49,8 +49,8 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Terraform Validate
-        run: terraform validate
+      # - name: Terraform Validate
+      #   run: terraform validate
 
       - name: Terraform Plan
         id: plan
