@@ -29,8 +29,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash
-        working-directory: terraform_module  # <-- changed to match your structure
+        working-directory: ./terraform_module  # <-- changed to match your structure
 
     steps:
       - name: Checkout Repository
