@@ -24,9 +24,11 @@ env:
 
 jobs:
   terraform:
-    working_directory: ./terraform_module
     name: Terraform
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform_module
 
     steps:
     - name: Checkout Repository
@@ -49,6 +51,7 @@ jobs:
         echo "Branch: ${{ github.ref_name }}"
         cp ../env/${{ github.ref_name }}.tfvars ./
         ls -la
+      if: github.ref != 'refs/heads/test'
 
     - name: Terraform Init
       run: terraform init -input=false
