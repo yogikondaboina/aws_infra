@@ -58,7 +58,6 @@ jobs:
           name: terraform-plan
           path: tfplan
 
-
       - name: Terraform Apply (on main only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false tfplan
@@ -75,4 +74,16 @@ jobs:
           echo "Uploading Terraform state file to S3..."
           aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
 
-                
+      - name: Upload Terraform State to S3
+        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
+        run: |
+          echo "Uploading Terraform state file to S3..."
+          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
+
+      - name: Upload Terraform State to S3
+        if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+        run: |
+          echo "Uploading Terraform state file to S3..."
+          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
+
+              
