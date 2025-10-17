@@ -23,8 +23,8 @@ env:
 
 jobs:
   terraform:
-    name: Terraform
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Terraform
     runs-on: ubuntu-latest
 
     defaults:

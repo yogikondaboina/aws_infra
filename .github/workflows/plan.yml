@@ -66,6 +66,7 @@ jobs:
           else
             echo "Branch not recognized, skipping Terraform Plan."
             exit 0
+            echo "Running Terraform Plan for $BRANCH"
           fi
 
 
