@@ -1,12 +1,16 @@
 name: Terraform Apply to AWS
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-      - qa
-      - prod
+  workflow_run:
+    workflows: ["Terraform Plan"]  # Must match the name exactly
+    types:
+      - completed
+    branches: 
+        - main
+        - dev
+        - qa
+        - prod
+      
 
   pull_request:
     branches:
