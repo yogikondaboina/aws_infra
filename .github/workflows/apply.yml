@@ -62,10 +62,21 @@ jobs:
           name: terraform-plan
           path: tfplan
 
-      - name: Terraform Apply (on main only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false tfplan
-     
+      - name: Terraform Apply
+        if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main')
+        run: |
+          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_REF#refs/heads/}" = "dev" ]; then
+            terraform plan -out=tfplan -input=false -var-file="env/dev.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
+            terraform plan -out=tfplan -input=false -var-file="env/qa.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="env/prod.tfvars"
+          else
+            echo "Branch not recognized, skipping Terraform Plan."
+          fi
+          echo "Applying Terraform Plan..."
+          terraform apply -auto-approve -input=false tfplan     
 
       - name: Upload Terraform State to S3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -73,22 +84,6 @@ jobs:
           echo "Uploading Terraform state file to S3..."
           aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
 
-      - name: Upload Terraform State to S3
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-        run: |
-          echo "Uploading Terraform state file to S3..."
-          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
-
-      - name: Upload Terraform State to S3
-        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
-        run: |
-          echo "Uploading Terraform state file to S3..."
-          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
-
-      - name: Upload Terraform State to S3
-        if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
-        run: |
-          echo "Uploading Terraform state file to S3..."
-          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
+   
 
               
