@@ -42,10 +42,6 @@ jobs:
           role-to-assume: arn:aws:iam::596122389379:role/github-action-role
           aws-region: ${{ env.AWS_REGION }}
 
-      # Optional: Format Check
-      # - name: Terraform Format Check
-      #   run: terraform fmt -check
-
       - name: Terraform Init
         run: terraform init -input=false
 
