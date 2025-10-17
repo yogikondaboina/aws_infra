@@ -60,7 +60,7 @@ jobs:
           BRANCH="${GITHUB_REF#refs/heads/}"
           
           if [ "$BRANCH" = "dev" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+            terraform plan -out=tfplan -input=false -var-file="/env/dev.tfvars"
           elif [ "$BRANCH" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="../env/qa.tfvars"
           elif [ "$BRANCH" = "main" ] || [ "$BRANCH" = "prod" ]; then
