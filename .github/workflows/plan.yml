@@ -1,4 +1,4 @@
-name: Terraform Plan to AWS
+name: Terraform Plan
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
           fi
 
 
-      # - name: Terraform Plan (Dev)
+      # - name: Terraform Plan (Dev) #
       #   if: github.ref == 'refs/heads/dev'
       #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
 
