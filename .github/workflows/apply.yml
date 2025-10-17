@@ -2,7 +2,7 @@ name: Terraform Apply to AWS
 
 on:
   workflow_run:
-    workflows: ["Terraform Plan"]  # Must match the name exactly
+    workflows: ["Plan.yml"]  # Must match the name exactly
     types:
       - completed
     branches: 
@@ -10,7 +10,6 @@ on:
         - dev
         - qa
         - prod
-      
 
   pull_request:
     branches:
