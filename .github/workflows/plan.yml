@@ -62,8 +62,6 @@ jobs:
             terraform plan -out=tfplan -input=false -var-file="env/dev.tfvars"
           elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="env/qa.tfvars"
-          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
-            terraform plan -out=tfplan -input=false -var-file="env/prod.tfvars"
           else
             echo "Branch not recognized, skipping Terraform Plan."
             exit 0
