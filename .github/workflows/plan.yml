@@ -1,0 +1,96 @@
+name: Terraform Plan to AWS
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - qa
+      - prod
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write   # Required for OIDC authentication
+  contents: read
+
+env:
+  TF_CLI_ARGS: "red"
+  TF_IN_AUTOMATION: true
+  AWS_REGION: us-east-1    # <-- change this to your preferred region
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: .  # <-- change if your code is elsewhere
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::596122389379:role/github-action-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main')
+        id: plan
+        run: |
+          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
+          else
+            echo "Branch not recognized, skipping Terraform Plan."
+          fi
+
+
+      # - name: Terraform Plan (Dev)
+      #   if: github.ref == 'refs/heads/dev'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+
+      # - name: Terraform Plan (QA)
+      #   if: github.ref == 'refs/heads/qa'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
+
+      # - name: Terraform Plan (Prod)
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
+
+      # - name: Terraform Plan
+      #   if: github.ref != 'refs/heads/test'
+      #   id: plan
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
+
+
+              
