@@ -8,7 +8,7 @@ name: Terraform Apply to AWS
 
 on:
   workflow_run:
-    workflows: ["PlTerraform Plan to AWSan"]
+    workflows: ["Terraform Plan to AWS"]
     types:
       - completed
 
