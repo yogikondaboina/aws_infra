@@ -65,6 +65,7 @@ jobs:
             terraform plan -out=tfplan -input=false -var-file="env/prod.tfvars"
           else
             echo "Branch not recognized, skipping Terraform Plan."
+            exit 0
           fi
 
 
