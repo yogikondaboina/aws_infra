@@ -1,4 +1,4 @@
-name: Terraform Plan
+name: Terraform Plan  # Make sure this name is consistent
 
 on:
   push:
@@ -14,23 +14,23 @@ on:
       - main
 
 permissions:
-  id-token: write   # Required for OIDC authentication
+  id-token: write
   contents: read
 
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1    # <-- change this to your preferred region
+  AWS_REGION: us-east-1
 
 jobs:
   terraform:
-    name: Terraform
+    name: Terraform Plan
     runs-on: ubuntu-latest
 
     defaults:
       run:
         shell: bash
-        working-directory: .  # <-- change if your code is elsewhere
+        working-directory: .
 
     steps:
       - name: Checkout Repository
@@ -67,33 +67,10 @@ jobs:
           else
             echo "Branch not recognized, skipping Terraform Plan."
             exit 0
-            echo "Running Terraform Plan for $BRANCH"
           fi
-
-
-      # - name: Terraform Plan#
-      #   if: github.ref == 'refs/heads/dev'
-      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
-
-      # - name: Terraform Plan (QA)
-      #   if: github.ref == 'refs/heads/qa'
-      #   run: terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
-
-      # - name: Terraform Plan (Prod)
-      #   if: github.ref == 'refs/heads/main'
-      #   run: terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
-
-      # - name: Terraform Plan
-      #   if: github.ref != 'refs/heads/test'
-      #   id: plan
-      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
-
 
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: tfplan
-
-
-              
