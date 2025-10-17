@@ -1,4 +1,4 @@
-name: Terraform Plan  # Make sure this name is consistent
+name: Terraform Plan # Make sure this name is consistent
 
 on:
   push:
