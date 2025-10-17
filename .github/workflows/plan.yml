@@ -1,4 +1,4 @@
-name: Terraform Plan # Make sure this name is consistent
+name: Terraform Plan
 
 on:
   push:
@@ -7,30 +7,29 @@ on:
       - dev
       - qa
       - prod
-      - test
 
   pull_request:
     branches:
       - main
 
 permissions:
-  id-token: write
+  id-token: write   # Required for OIDC authentication
   contents: read
 
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1
+  AWS_REGION: us-east-1    # <-- change this to your preferred region
 
 jobs:
   terraform:
-    name: Terraform Plan
+    name: Terraform
     runs-on: ubuntu-latest
 
     defaults:
       run:
         shell: bash
-        working-directory: .
+        working-directory: .  # <-- change if your code is elsewhere
 
     steps:
       - name: Checkout Repository
@@ -62,13 +61,38 @@ jobs:
             terraform plan -out=tfplan -input=false -var-file="env/dev.tfvars"
           elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="env/qa.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="env/prod.tfvars"
           else
             echo "Branch not recognized, skipping Terraform Plan."
             exit 0
+            echo "Running Terraform Plan for $BRANCH"
           fi
+
+
+      # - name: Terraform Plan#
+      #   if: github.ref == 'refs/heads/dev'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+
+      # - name: Terraform Plan (QA)
+      #   if: github.ref == 'refs/heads/qa'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
+
+      # - name: Terraform Plan (Prod)
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
+
+      # - name: Terraform Plan
+      #   if: github.ref != 'refs/heads/test'
+      #   id: plan
+      #   run: terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+
 
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: tfplan
+
+
+              
