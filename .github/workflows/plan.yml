@@ -58,7 +58,7 @@ jobs:
         id: plan
         run: |
           echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
-          if [ "${GITHUB_REF#refs/heads/}" = "dev" ]; then
+          if [ "${GITHUB_REF#refs/heads/}" = "test" ]; then
             terraform plan -out=tfplan -input=false -var-file="env/dev.tfvars"
           elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="env/qa.tfvars"
