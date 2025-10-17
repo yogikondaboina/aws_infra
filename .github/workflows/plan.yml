@@ -29,7 +29,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ../terraform_module/s3  # <-- changed to match your structure
+        working-directory: ./terraform_module/s3  # <-- changed to match your structure
 
     steps:
       - name: Checkout Repository
@@ -60,7 +60,7 @@ jobs:
           BRANCH="${GITHUB_REF#refs/heads/}"
           
           if [ "$BRANCH" = "dev" ]; then
-            terraform plan -out=tfplan -input=false -var-file="../env/dev.tfvars"
+            terraform plan -out=tfplan -input=false -var-file="env/dev.tfvars"
           elif [ "$BRANCH" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="../env/qa.tfvars"
           elif [ "$BRANCH" = "main" ] || [ "$BRANCH" = "prod" ]; then
