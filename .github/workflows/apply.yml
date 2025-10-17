@@ -1,9 +1,13 @@
-name: Terraform Deploy to AWS
+name: Terraform Apply to AWS
 
 on:
   push:
     branches:
       - main
+      - dev
+      - qa
+      - prod
+
   pull_request:
     branches:
       - main
@@ -61,15 +65,16 @@ jobs:
       - name: Terraform Apply (on main only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false tfplan
-      - name: Show current directory and files
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Files in current directory:"
-          ls -al
+     
 
       - name: Upload Terraform State to S3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          echo "Uploading Terraform state file to S3..."
+          aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
+
+      - name: Upload Terraform State to S3
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: |
           echo "Uploading Terraform state file to S3..."
           aws s3 cp ./terraform.tfstate s3://host-1q/terraform.tfstate
