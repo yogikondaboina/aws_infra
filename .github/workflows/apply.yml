@@ -2,8 +2,8 @@ name: Terraform Apply to AWS
 
 on:
   workflow_run:
-    workflows: ["Terraform Plan"]   # 👈 must match EXACTLY
-    types: [completed]
+    workflows: "Terraform Plan"   # 👈 must match EXACTLY
+    types: completed
 
   pull_request:
     branches:
