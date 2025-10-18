@@ -1,46 +1,34 @@
-name: Terraform Plan
+name: Terraform CI/CD
 
 on:
   push:
-    branches:
-      - main
-      - dev
-      - qa
-      - prod
+    branches: [main, dev, qa, prod]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
-  id-token: write   # Required for OIDC authentication
+  id-token: write
   contents: read
 
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1    # <-- change this if needed
+  AWS_REGION: us-east-1
 
 jobs:
   terraform:
-    name: Terraform
+    name: Terraform Plan & Apply
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: .  # change if your Terraform is in a subfolder
-
     env:
-      BRANCH: ${{ github.ref_name }}   # branch short name (dev, qa, main)
-
+      BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials via OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}  # store role ARN as a repo secret
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
@@ -48,30 +36,23 @@ jobs:
         with:
           terraform_version: 1.8.5
 
-      - name: Terraform Init
-        run: terraform init -input=false
+      - name: Initialize and Validate
+        run: |
+          terraform init -input=false
+          terraform validate
 
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main')
+      - name: Generate Terraform Plan
         id: plan
         run: |
-          echo "Running Terraform Plan for branch: ${BRANCH}"
-          if [ "${BRANCH}" = "dev" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
-          elif [ "${BRANCH}" = "qa" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
-          elif [ "${BRANCH}" = "main" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
-          else
-            echo "Branch not recognized, skipping Terraform Plan."
-            exit 0
-          fi
+          case "$BRANCH" in
+            dev)   VARFILE="./env/dev.tfvars" ;;
+            qa)    VARFILE="./env/qa.tfvars" ;;
+            main)  VARFILE="./env/prod.tfvars" ;;
+            prod)  VARFILE="./env/prod.tfvars" ;;
+            *)     echo "Unsupported branch"; exit 1 ;;
+          esac
+          terraform plan -out=tfplan -input=false -var-file="$VARFILE"
 
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan-${{ env.BRANCH }}   # artifact named per-branch
-          path: tfplan
+      - name: Apply Terraform Plan
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false tfplan
