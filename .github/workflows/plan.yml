@@ -7,7 +7,6 @@ on:
       - dev
       - qa
       - prod
-      - test
 
   pull_request:
     branches:
@@ -18,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  TF_CLI_ARGS: "-no-color"
+  TF_CLI_ARGS: "red"
   TF_IN_AUTOMATION: true
   AWS_REGION: us-east-1    # <-- change this to your preferred region
 
@@ -26,59 +25,53 @@ jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+
     defaults:
       run:
-        working-directory: ./terraform_module
+        shell: bash
+        working-directory: .  # <-- change if your code is elsewhere
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.8.5
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
 
-    - name: Configure AWS Credentials via OIDC
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::596122389379:role/github-action-role
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::596122389379:role/github-action-role
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Copy Environment Files
-      run: |
-        echo "Current directory: $(pwd)"
-        echo "Branch: ${{ github.ref_name }}"
-        cp ../env/${{ github.ref_name }}.tfvars ./
-        ls -la
-      if: github.ref != 'refs/heads/test'
+      - name: Terraform Init
+        run: terraform init -input=false
 
-    - name: Terraform Init
-      run: terraform init -input=false
+      - name: Terraform Validate
+        run: terraform validate
 
-    - name: Terraform Validate
-      run: terraform validate
+      - name: Terraform Plan
+        if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main')
+        id: plan
+        run: |
+          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
+          else
+            echo "Branch not recognized, skipping Terraform Plan."
+          fi
 
-    - name: Terraform Plan
-      if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prod')
-      id: plan
-      run: |
-        echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
-        BRANCH="${GITHUB_REF#refs/heads/}"
-        
-        if [ "$BRANCH" = "dev" ]; then
-          terraform plan -out=tfplan -input=false -var-file="dev.tfvars"
-        elif [ "$BRANCH" = "qa" ]; then
-          terraform plan -out=tfplan -input=false -var-file="qa.tfvars"
-        elif [ "$BRANCH" = "main" ] || [ "$BRANCH" = "prod" ]; then
-          terraform plan -out=tfplan -input=false -var-file="prod.tfvars"
-        else
-          echo "No specific configuration for branch: $BRANCH"
-          exit 1
-        fi
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
 
-    - name: Upload Plan Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-plan-${{ github.ref_name }}
-        path: terraform_module/tfplan
+
+              
