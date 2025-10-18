@@ -2,62 +2,57 @@ name: Terraform Apply
 
 on:
   workflow_run:
-    workflows: ["Terraform Plan"]  # Must match EXACTLY the name in plan.yml
-    types: 
+    workflows: ["Terraform Plan"]
+    types:
       - completed
-    branches:
-      - main
-      - dev
-      - qa
 
 permissions:
-  id-token: write
+  id-token: write   # Required for OIDC authentication
   contents: read
 
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1
+  AWS_REGION: us-east-1 
 
 jobs:
   terraform-apply:
-    # Only run if the Plan workflow was successful AND it was triggered by push (not PR)
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
-    name: Terraform Apply
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: .
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download Workflow Run Artifact
-        uses: actions/github-script@v7
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          script: |
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: ${{ github.event.workflow_run.id }},
-            });
-            const matchArtifact = artifacts.data.artifacts.find((artifact) => {
-              return artifact.name == "terraform-plan"
-            });
-            if (matchArtifact) {
-              const download = await github.rest.actions.downloadArtifact({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                artifact_id: matchArtifact.id,
-                archive_format: 'zip',
-              });
-            } else {
-              throw new Error('Artifact not found');
-            }
+          terraform_version: 1.8.5
 
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
 
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${ secrets.AWS_ROLE_TO_ASSUME }
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Apply
+        run: |
+          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_REF#refs/heads/}" = "dev" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
+          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
+          else
+            echo "Branch not recognized, skipping Terraform Plan."
+          fi
+          terraform apply -auto-approve -input=false tfplan
