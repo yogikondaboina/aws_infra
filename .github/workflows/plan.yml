@@ -7,7 +7,6 @@ on:
       - dev
       - qa
       - prod
-
   pull_request:
     branches:
       - main
@@ -17,9 +16,9 @@ permissions:
   contents: read
 
 env:
-  TF_CLI_ARGS: "red"
+  TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1    # <-- change this to your preferred region
+  AWS_REGION: us-east-1    # <-- change this if needed
 
 jobs:
   terraform:
@@ -29,7 +28,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: .  # <-- change if your code is elsewhere
+        working-directory: .  # <-- change if your Terraform code is in a subfolder
 
     steps:
       - name: Checkout Repository
@@ -43,9 +42,8 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::596122389379:user/Dev
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
-
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -73,6 +71,3 @@ jobs:
         with:
           name: terraform-plan
           path: tfplan
-
-
-              
