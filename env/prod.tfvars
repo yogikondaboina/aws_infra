@@ -1,1 +1,0 @@
-bucket_name = "host-1p"

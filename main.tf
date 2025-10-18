@@ -13,6 +13,14 @@ provider "aws" {
   region = var.aws_region
 }
 
+terraform {
+  backend "s3" {
+    bucket = "store-state-d"
+    key    = "s3-state"
+    region = "us-east-1"
+  }
+}
+
 module "s3_bucket" {
   source          = "./terraform_module/s3"
   bucket_name     = var.bucket_name
