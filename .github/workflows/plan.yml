@@ -28,22 +28,25 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: .  # <-- change if your Terraform code is in a subfolder
+        working-directory: .  # change if your Terraform is in a subfolder
+
+    env:
+      BRANCH: ${{ github.ref_name }}   # branch short name (dev, qa, main)
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}   # store role ARN as a repo secret
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
-
-      - name: Configure AWS Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::596122389379:role/testrole #$( secrets.AWS_ROLE_TO_ASSUME )
-          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -55,19 +58,20 @@ jobs:
         if: github.ref != 'refs/heads/test' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main')
         id: plan
         run: |
-          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
-          if [ "${GITHUB_REF#refs/heads/}" = "dev" ]; then
+          echo "Running Terraform Plan for branch: ${BRANCH}"
+          if [ "${BRANCH}" = "dev" ]; then
             terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
-          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
+          elif [ "${BRANCH}" = "qa" ]; then
             terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
-          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+          elif [ "${BRANCH}" = "main" ]; then
             terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
           else
             echo "Branch not recognized, skipping Terraform Plan."
+            exit 0
           fi
 
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: terraform-plan
+          name: terraform-plan-${{ env.BRANCH }}   # artifact named per-branch
           path: tfplan

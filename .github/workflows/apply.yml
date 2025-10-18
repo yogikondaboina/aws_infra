@@ -13,7 +13,8 @@ permissions:
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  AWS_REGION: us-east-1 
+  AWS_REGION: us-east-1
+  TRIGGER_BRANCH: ${{ github.event.workflow_run.head_branch }}   # branch that triggered the plan workflow
 
 jobs:
   terraform-apply:
@@ -34,25 +35,24 @@ jobs:
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4
         with:
-          name: terraform-plan
-          path: tfplan
+          name: terraform-plan-${{ env.TRIGGER_BRANCH }}   # match artifact name from plan workflow
+          path: .   # download into the workspace
 
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::596122389379:role/testrole
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Apply
+      - name: Terraform Apply (use the downloaded plan file)
         run: |
-          echo "Running Terraform Plan for branch: ${GITHUB_REF#refs/heads/}"
-          if [ "${GITHUB_REF#refs/heads/}" = "dev" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/dev.tfvars"
-          elif [ "${GITHUB_REF#refs/heads/}" = "qa" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/qa.tfvars"
-          elif [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
-            terraform plan -out=tfplan -input=false -var-file="./env/prod.tfvars"
-          else
-            echo "Branch not recognized, skipping Terraform Plan."
+          echo "Trigger branch: ${{ env.TRIGGER_BRANCH }}"
+          # find the tfplan file (downloaded artifact will place it into a folder)
+          TFPLAN_PATH=$(find . -type f -name tfplan -print -quit)
+          if [ -z "$TFPLAN_PATH" ]; then
+            echo "tfplan file not found. Failing."
+            exit 1
           fi
-          terraform apply -auto-approve -input=false tfplan
+          echo "Found plan at: $TFPLAN_PATH"
+          terraform init -input=false
+          terraform apply -auto-approve -input=false "$TFPLAN_PATH"
