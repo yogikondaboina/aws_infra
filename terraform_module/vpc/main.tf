@@ -46,7 +46,6 @@ resource "aws_internet_gateway" "vpc" {
 
 # Public Route Table
 resource "aws_route_table" "public" {
-    count      =   2
   vpc_id = aws_vpc.vpc.id
 
   route {
@@ -55,7 +54,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.vname}-public-rt-${count.index + 1}"
+    Name = "${var.vname}-public-rt"
   }
 }
 
@@ -65,4 +64,21 @@ resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.public.id
 }
+
+# Private Route Table
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.vname}-private-rt"
+  }
+}
+
+# Associate Public Subnets with Public Route Table
+resource "aws_route_table_association" "public_assoc" {
+  count          = length(aws_subnet.public_subnet)
+  subnet_id      = aws_subnet.public_subnet[count.index].id
+  route_table_id = aws_route_table.public.id
+}
+
 
