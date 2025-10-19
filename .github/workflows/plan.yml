@@ -13,11 +13,13 @@ permissions:
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
+  TF_BACKEND_BUCKET: store-state-d
+  TF_BACKEND_KEY: terraform/s3.tfstate
   AWS_REGION: us-east-1
 
 jobs:
   terraform:
-    name: Terraform Plan & Apply
+    name: Terraform Plan 
     runs-on: ubuntu-latest
     env:
       BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -36,10 +38,13 @@ jobs:
         with:
           terraform_version: 1.8.5
 
-      - name: Initialize and Validate
+      - name: Terraform Init
         run: |
-          terraform init -input=false
-          terraform validate
+          terraform init \
+            -backend-config="bucket=${{ env.TF_BACKEND_BUCKET }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="encrypt=true"
 
       - name: Generate Terraform Plan
         id: plan
@@ -53,6 +58,6 @@ jobs:
           esac
           terraform plan -out=tfplan -input=false -var-file="$VARFILE"
 
-      - name: Apply Terraform Plan
+      - name: Terraform Apply
         if: github.event_name == 'push'
         run: terraform apply -auto-approve -input=false tfplan
