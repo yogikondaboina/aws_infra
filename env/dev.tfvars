@@ -1,3 +1,3 @@
 bucket_name = "host-d"
 vname       = "host"
-login_key   = host
+login_key   = "login_key"
