@@ -46,6 +46,7 @@ resource "aws_internet_gateway" "vpc" {
 
 # Public Route Table
 resource "aws_route_table" "public" {
+    count      =   2
   vpc_id = aws_vpc.vpc.id
 
   route {
