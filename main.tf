@@ -9,6 +9,16 @@ terraform {
   required_version = ">= 1.5.0"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "store-state-d"
+    key            = "terraform/s3.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+  }
+}
+
+
 provider "aws" {
   region = var.aws_region
 }
