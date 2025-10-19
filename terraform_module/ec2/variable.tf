@@ -1,8 +1,8 @@
 # Availability Zones
 variable "login_key" {
-  type = "string"
+  type = string
 }
 
 variable "vname" {
-    type = "string"
+    type = string
 }
