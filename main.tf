@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "s3_bucket" {
-  source          = "./aws_infra/terraform_module/s3"
+  source          = "aws_infra/terraform_module/s3"
   bucket_name     = var.bucket_name
   acl             = "private"
 
