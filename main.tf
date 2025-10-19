@@ -26,10 +26,14 @@ module "s3_bucket" {
   source          = "./terraform_module/s3"
   bucket_name     = var.bucket_name
   acl             = "private"
-
-  tags = {
-    Environment = "Dev"
-    Project     = "S3 Module Demo"
-  }
 }
 
+
+module "my_vpc" {
+  source                = "./terraform_module/vpc"
+  vname                 = var.vname
+  vpc_cidr              = var.vpc_cidr
+  public_subnet_cidr    = var.public_subnet_cidr
+  private_subnet_cidr   = var.private_subnet_cidr
+  availability_zones    = var.availability_zones
+}
