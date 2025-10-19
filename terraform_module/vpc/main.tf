@@ -54,7 +54,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.vname}-public-rt"
+    Name = "${var.vnamecount.index + 1}}-public-rt${count.index + 1}"
   }
 }
 
