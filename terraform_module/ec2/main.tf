@@ -1,8 +1,40 @@
-resource "aws_instance" "example" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+variable "vpc_id" {}
 
-  tags = {
-    Name = "dev"
+data "aws_vpc" "data_vpc" {
+  id = var.vpc_id
+}
+
+resource "aws_subnet" "example" {
+  vpc_id            = data.aws_vpc.vpc.id
+  availability_zone = "us-west-2a"
+  cidr_block        = cidrsubnet(data.aws_vpc.vpc.cidr_block, 4, 1)
+}
+
+resource "tls_private_key" "my_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "key_pair" {
+  key_name   = var.login_key
+  public_key = tls_private_key.my_key.public_key_openssh
+}
+
+# Save the private key to a file locally
+resource "local_file" "private_key" {
+  content  = tls_private_key.my_key.private_key_pem
+  filename = "${path.module}/my-ubuntu-key.pem"
+  file_permission = "0600"
+}
+
+resource "aws_instance" "my_ec2" {
+  ami             = "ami-0885b1f6bd170450c"  # Ubuntu 22.04 LTS in us-east-1
+  instance_type   = "t2.micro"
+  subnet_id       = data.aws_subnet.data_subnets.id  
+  security_groups = [aws_security_group.my_sg.name]
+  key_name        = aws_key_pair.key_pair.key_name
+
+    tags = {
+    Name = "${var.vname}-compute"
   }
 }
