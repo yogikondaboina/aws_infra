@@ -11,7 +11,7 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = "store-state-d"
+    bucket         = "statestores3-d"
     region         = "us-east-1"
     encrypt        = true
   }
