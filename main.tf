@@ -32,7 +32,7 @@ data "aws_vpc" "data_vpc" {
 data "aws_subnets" "public" {
   filter {
     name   = data.aws_vpc.data_vpc
-    values = [data.aws_vpc.(10.0.1.0/24", "10.0.2.0/24)]
+    values = [data.aws_vpc.("10.0.1.0/24", "10.0.2.0/24")]
   }
 
   filter {
@@ -44,7 +44,7 @@ data "aws_subnets" "public" {
 data "aws_subnets" "private" {
   filter {
     name   = data.aws_vpc.data_vpc
-    values = [data.aws_vpc.(10.0.3.0/24", "10.0.4.0/24)]
+    values = [data.aws_vpc.("10.0.3.0/24", "10.0.4.0/24")]
   }
 
   filter {
