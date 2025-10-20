@@ -1,14 +1,3 @@
-variable "vpc_id" {}
-
-data "aws_vpc" "data_vpc" {
-  id = var.vpc_id
-}
-
-resource "aws_subnet" "example" {
-  vpc_id            = data.aws_vpc.vpc.id
-  availability_zone = "us-west-2a"
-  cidr_block        = cidrsubnet(data.aws_vpc.vpc.cidr_block, 4, 1)
-}
 
 resource "tls_private_key" "my_key" {
   algorithm = "RSA"
