@@ -14,7 +14,7 @@ env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
   TF_BACKEND_BUCKET: statesotre
-  TF_BACKEND_KEY: c2.tfstate
+  TF_BACKEND_KEY: vpc.tfstate
   AWS_REGION: ap-south-1
 
 jobs:
