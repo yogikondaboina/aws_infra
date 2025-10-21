@@ -11,8 +11,8 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = "statestores3-d"
-    region         = "us-east-1"
+    bucket         = "statesotre"
+    region         = "ap-south-1"
     encrypt        = true
   }
 }
@@ -22,11 +22,11 @@ provider "aws" {
 }
  
 
-# module "s3_bucket" {
-#   source          = "./terraform_module/s3"
-#   bucket_name     = var.bucket_name
-#   acl             = "private"
-# }
+module "s3_bucket" {
+  source          = "./terraform_module/s3"
+  bucket_name     = var.bucket_name
+  acl             = "private"
+}
 
 # module "my_vpc" {
 #   source                = "./terraform_module/vpc"
@@ -37,10 +37,10 @@ provider "aws" {
 #   availability_zones    = var.availability_zones
 # }
 
-# EC2 Instance
-module "ec2" {
-  source        = "./terraform_module/ec2"
-  ami_id         = var.ami_id
-  vname         = var.vname
-  login_key      = var.login_key
-}
+# # EC2 Instance
+# module "ec2" {
+#   source        = "./terraform_module/ec2"
+#   ami_id         = var.ami_id
+#   vname         = var.vname
+#   login_key      = var.login_key
+# }
