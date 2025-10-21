@@ -7,30 +7,9 @@ data "aws_vpc" "vpc" {
 }
 
 # Get all public subnets in that VPC
-data "aws_subnets" "public" {
-  filter {
-    name   = "host-public-subnet-1"
-    values = [data.aws_vpc.vpc.id]
-  }
-
-  filter {
-    name   = "tag:Type"
-    values = ["public"]
-  }
+data "aws_subnet" "public_1" {
+  id = "subnet-0403d8d04edd66439"
 }
-
-# # Get all private subnets in that VPC
-# data "aws_subnets" "private" {
-#   filter {
-#     name   = "vpc-id"
-#     values = [data.aws_vpc.selected.id]
-#   }
-
-#   filter {
-#     name   = "tag:Type"
-#     values = ["private"]
-#   }
-# }
 
 resource "tls_private_key" "my_key" {
   algorithm = "RSA"
