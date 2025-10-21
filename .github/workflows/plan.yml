@@ -62,3 +62,9 @@ jobs:
       - name: Terraform Apply
         if: github.event_name == 'push'
         run: terraform apply -auto-approve -input=false tfplan
+
+
+      # - name: Terraform Destroy
+      #   if: github.event_name == 'push'
+      #   run:  terraform destroy -auto-approve -var-file="env/dev.tfvars"
+       

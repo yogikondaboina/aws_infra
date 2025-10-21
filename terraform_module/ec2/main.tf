@@ -8,7 +8,7 @@ data "aws_vpc" "vpc" {
 
 # Get all public subnets in that VPC
 data "aws_subnet" "public" {
-  id = "subnet-0403d8d04edd66439"
+  id = "subnet-04e8ddf790451d906"
 }
 
 resource "tls_private_key" "my_key" {
