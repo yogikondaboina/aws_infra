@@ -39,3 +39,13 @@ variable "availability_zones" {
 variable "login_key" {
   type = string
 }
+
+variable "subnet_name" {
+  description = "Subnet name to lookup"
+  type         = string
+}
+
+variable "vpc_name" {
+  description = "Subnet name to lookup"
+  type         = string
+}

@@ -7,7 +7,7 @@ data "aws_vpc" "vpc" {
 }
 
 # Get all public subnets in that VPC
-data "aws_subnet" "public_1" {
+data "aws_subnet" "public" {
   id = "subnet-0403d8d04edd66439"
 }
 

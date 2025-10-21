@@ -39,9 +39,7 @@ provider "aws" {
 
 # EC2 Instance
 module "ec2" {
-  source     = "./terraform_module/ec2"
-  vname      = var.vname
-  login_key  = var.login_key
-  #subnet_id = data.aws_subnet.public.id
-  #sg_id     = data.aws_security_group.ec2_sg.id
+  source        = "./terraform_module/ec2"
+  vname         = var.vname
+  login_key      = var.login_key
 }
