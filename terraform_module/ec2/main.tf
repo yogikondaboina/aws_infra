@@ -24,7 +24,7 @@ resource "aws_key_pair" "key_pair" {
 # Save the private key to a file locally
 resource "local_file" "private_key" {
   content  = tls_private_key.my_key.private_key_pem
-  filename = "${path.terraform_module}/my-ubuntu-key.pem"
+  filename = "${path.module}/my-ubuntu-key.pem"
   file_permission = "0600"
 }
 
