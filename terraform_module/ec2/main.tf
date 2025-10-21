@@ -1,3 +1,42 @@
+# Get existing VPC
+data "aws_vpc" "vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["host-vpc"]
+  }
+}
+
+# Get all public subnets in that VPC
+data "aws_subnets" "public" {
+  filter {
+    name   = "host-public-subnet-1"
+    values = [data.aws_vpc.vpc.id]
+  }
+
+  filter {
+    name   = "tag:Type"
+    values = ["public"]
+  }
+}
+
+# # Get all private subnets in that VPC
+# data "aws_subnets" "private" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.selected.id]
+#   }
+
+#   filter {
+#     name   = "tag:Type"
+#     values = ["private"]
+#   }
+# }
+
+# Output subnet IDs
+output "public_subnet_ids" {
+  value = data.aws_subnets.public.ids
+}
+
 
 resource "tls_private_key" "my_key" {
   algorithm = "RSA"
