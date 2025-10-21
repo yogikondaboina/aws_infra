@@ -30,7 +30,7 @@ resource "local_file" "private_key" {
 
 resource "aws_instance" "ec2" {
   ami           = var.ami_id
-  instance_type = "t2.micro"
+  instance_type = "t3.small"
   subnet_id     = data.aws_subnet.public.id
 
     tags = {
