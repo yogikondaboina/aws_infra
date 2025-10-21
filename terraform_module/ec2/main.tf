@@ -32,12 +32,6 @@ data "aws_subnets" "public" {
 #   }
 # }
 
-# Output subnet IDs
-output "public_subnet_ids" {
-  value = data.aws_subnets.public.ids
-}
-
-
 resource "tls_private_key" "my_key" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -55,12 +49,10 @@ resource "local_file" "private_key" {
   file_permission = "0600"
 }
 
-resource "aws_instance" "my_ec2" {
-  ami             = "ami-0885b1f6bd170450c"  # Ubuntu 22.04 LTS in us-east-1
-  instance_type   = "t2.micro"
-  subnet_id       = data.aws_subnet.data_subnets.id  
-  security_groups = [aws_security_group.my_sg.name]
-  key_name        = aws_key_pair.key_pair.key_name
+resource "aws_instance" "ec2" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  subnet_id     = element(data.aws_subnets.public.ids, 0)
 
     tags = {
     Name = "${var.vname}-compute"
