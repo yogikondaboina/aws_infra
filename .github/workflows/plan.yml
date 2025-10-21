@@ -13,9 +13,9 @@ permissions:
 env:
   TF_CLI_ARGS: "-no-color"
   TF_IN_AUTOMATION: true
-  TF_BACKEND_BUCKET: statestores3-d
+  TF_BACKEND_BUCKET: statesotre
   TF_BACKEND_KEY: s3.tfstate
-  AWS_REGION: us-east-1
+  AWS_REGION: ap-south-1
 
 jobs:
   terraform:
