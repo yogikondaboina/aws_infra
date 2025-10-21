@@ -33,7 +33,7 @@ variable "private_subnet_cidr" {
 }
 # Availability Zones
 variable "availability_zones" {
-  default = ["us-east-1a", "us-east-1b"]
+  default = ["ap-south-1a", "ap-south-1b"]
 }
 
 variable "login_key" {
