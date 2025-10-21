@@ -12,7 +12,7 @@ terraform {
 terraform {
   backend "s3" {
     bucket         = "statesotre"
-    key            = "s3.tfstate" 
+    key            = "vpc.tfstate" 
     region         = "ap-south-1"
     encrypt        = true
   }
@@ -23,20 +23,20 @@ provider "aws" {
 }
  
 
-module "s3_bucket" {
-  source          = "./terraform_module/s3"
-  bucket_name     = var.bucket_name
-  acl             = "private"
-}
-
-# module "my_vpc" {
-#   source                = "./terraform_module/vpc"
-#   vname                 = var.vname
-#   vpc_cidr              = var.vpc_cidr
-#   public_subnet_cidr    = var.public_subnet_cidr
-#   private_subnet_cidr   = var.private_subnet_cidr
-#   availability_zones    = var.availability_zones
+# module "s3_bucket" {
+#   source          = "./terraform_module/s3"
+#   bucket_name     = var.bucket_name
+#   acl             = "private"
 # }
+
+module "my_vpc" {
+  source                = "./terraform_module/vpc"
+  vname                 = var.vname
+  vpc_cidr              = var.vpc_cidr
+  public_subnet_cidr    = var.public_subnet_cidr
+  private_subnet_cidr   = var.private_subnet_cidr
+  availability_zones    = var.availability_zones
+}
 
 # # EC2 Instance
 # module "ec2" {
