@@ -6,3 +6,7 @@ variable "login_key" {
 variable "vname" {
     type = string
 }
+
+variable "ami_id" {
+  type = string
+}

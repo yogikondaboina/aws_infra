@@ -40,6 +40,7 @@ provider "aws" {
 # EC2 Instance
 module "ec2" {
   source        = "./terraform_module/ec2"
+  ami_id         = var.ami_id
   vname         = var.vname
   login_key      = var.login_key
 }
