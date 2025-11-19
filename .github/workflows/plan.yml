@@ -39,13 +39,29 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Terraform Init
-        working-directory: .
+        working-directory: ./import_resources
         run: |
           terraform init \
             -backend-config="bucket=${{ env.TF_BACKEND_BUCKET }}" \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
+
+      - name: Terraform Import S3 Bucket
+        run: terraform import aws_s3_bucket.example your-bucket-name
+
+
+      - name: Terraform Import existing resources
+        run: |
+          if [ -f imports.txt ]; then
+            while read -r addr id || [ -n "$addr" ]; do
+              echo "Importing $addr -> $id"
+              terraform import -lock=false -input=false "$addr" "$id" || true
+            done < imports.txt
+          else
+            echo "No imports.txt found, skipping import step."
+          fi
+
 
       - name: Generate Terraform Plan
         id: plan
@@ -59,12 +75,12 @@ jobs:
           esac
           terraform plan -out=tfplan -input=false -var-file="$VARFILE"
 
-      # - name: Terraform Apply
+      # # - name: Terraform Apply
+      # #   if: github.event_name == 'push'
+      # #   run: terraform apply -auto-approve input=false tfplan-
+
+
+      # - name: Terraform Destroy
       #   if: github.event_name == 'push'
-      #   run: terraform apply -auto-approve input=false tfplan-
-
-
-      - name: Terraform Destroy
-        if: github.event_name == 'push'
-        run:  terraform destroy -auto-approve -var-file="env/dev.tfvars"
+      #   run:  terraform destroy -auto-approve -var-file="env/dev.tfvars"
        
