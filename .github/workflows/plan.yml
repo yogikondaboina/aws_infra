@@ -48,6 +48,7 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform Import S3 Bucket
+        working-directory: import_resources
         run: terraform import aws_s3_bucket.s3_import import-s3yml
 
 
