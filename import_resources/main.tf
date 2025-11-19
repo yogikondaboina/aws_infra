@@ -1,3 +1,3 @@
-resource "aws_s3_bucket" "s3_import" {
+resource "aws_s3_bucket" "s3_impor" {
   
 }
