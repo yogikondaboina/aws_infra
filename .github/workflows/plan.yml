@@ -53,6 +53,7 @@ jobs:
 
 
       - name: Terraform Import existing resources
+        working-directory: import_resources
         run: |
           if [ -f imports.txt ]; then
             while read -r addr id || [ -n "$addr" ]; do
@@ -65,6 +66,7 @@ jobs:
 
 
       - name: Generate Terraform Plan
+        working-directory: import_resources
         id: plan
         run: |
           case "$BRANCH" in
